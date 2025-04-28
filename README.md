@@ -1,0 +1,2 @@
+# MintCondition
+Practico
