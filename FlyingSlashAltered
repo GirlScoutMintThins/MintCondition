@@ -1,0 +1,305 @@
+
+-- Get references to the necessary services and folders
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local attackClient = replicatedStorage:WaitForChild("RS"):WaitForChild("Modules"):WaitForChild("AttackClient")
+local weapons = attackClient:WaitForChild("Weapons")
+
+-- Find and destroy the existing "Flying Slash" ModuleScript
+local flyingSlash = weapons:FindFirstChild("Flying Slash")
+if flyingSlash then
+    flyingSlash:Destroy()
+    print("Flying Slash script has been deleted.")
+else
+    print("Flying Slash script not found.")
+end
+
+-- Create a new ModuleScript with altered functionality
+local newFlyingSlash = Instance.new("ModuleScript")
+newFlyingSlash.Name = "Flying Slash" -- Name it the same to replace the old one
+
+-- Set the source code for the new ModuleScript
+newFlyingSlash.Source = [[
+local FlyingSlash = {}
+
+-- Altered functionality
+function FlyingSlash.Attack()
+    local v1 = {}
+    local v_u_2 = require(game.ReplicatedStorage.RS.Modules.AttackClient)
+    function v1.Execute(p_u_3, _, p_u_4, p5, p_u_6)
+        -- upvalues: (copy) v_u_2
+        local v_u_7 = script.Name
+        local v8, v9 = v_u_2.ActionStart(p_u_3)
+        if v8 == nil then
+            v_u_2.WeaponEnd(p_u_3, p_u_4, p5)
+            return
+        end
+        local v10, _, _, _, _, _, v11, v_u_12, v13, v14, v15 = v_u_2.WeaponVars(p_u_3, p_u_4, p5, v_u_7)
+        if v10 == nil then
+            v_u_2.WeaponEnd(p_u_3, p_u_4, p5)
+            return
+        end
+        local v_u_16 = v14.SlashTrail.Color.Keypoints[1].Value
+        local v_u_17 = v14.AuraTrail.Color.Keypoints[1].Value
+        local _ = v14.AuraTrail.Transparency.Keypoints[1].Value
+        local v_u_18, v19, v_u_20, v_u_21, v_u_22, v_u_23 = v_u_2.GetWeaponPowers(p_u_3, v10.Name, v_u_7)
+        local v_u_24 = v14:Clone()
+        game.Debris:AddItem(v_u_24, 10)
+        v_u_2.StartAim(p_u_3, v8)
+        local v25 = v_u_2.SetupBP(p_u_3)
+        local v26 = v_u_2.LoadAnimation(v8, v_u_2.Animations.Weapons.FlyingSlash)
+        v_u_2.PlayAnimation(v26, 0.1, 1)
+        v_u_2.ToggleSlashTrail(v14, true, v_u_18, true)
+        v_u_2.AimForLength(p_u_3, 0.3 * v11, v9, v25)
+        v_u_2.AdjustSpeed(v26, 0)
+        if v_u_20 == true then
+            v_u_2.AimForLength(p_u_3, 0.3 * v11, v9, v25)
+        end
+        v_u_2.WeaponChargeEffect(true, p_u_6, p_u_3, v9, v14, v15, v_u_18, v19)
+        local v27 = tick()
+        local v_u_28 = 0
+        while p_u_3:FindFirstChild("WeaponCharge") and v_u_28 < 60 do
+            if tick() - v27 >= 2 then
+                v_u_28 = 60
+                break
+            end
+            v_u_28 = v_u_28 + 1
+            v_u_2.Aim(p_u_3, v9, v25, v_u_2.GetTarget(p_u_3))
+            v_u_2.BF.Wait(0.0166)
+        end
+        if v_u_2.BF.IsFigureAlive(p_u_3) == false then
+            v_u_2.WeaponEnd(p_u_3, p_u_4, p5)
+        else
+            v_u_2.WeaponChargeEffect(false, p_u_6, p_u_3, v9, v14, v15, v_u_18, v19)
+            v_u_2.ToggleSlashTrail(v14, true, v_u_18, false)
+            v_u_2.AimFix(v9, v25)
+            v_u_2.AdjustSpeed(v26, 1.5)
+            local v29 = 138 * v13
+            local v30 = v_u_2.GetTarget(p_u_3, v29)
+            v_u_2.BF.Wait(0.1)
+            v_u_2.AimFix(v9, v25)
+            local v_u_31 = Instance.new("Part")
+            v_u_31.Transparency = 1
+            v_u_31.Name = "Slash"
+            v_u_31.Shape = "Ball"
+            local v32 = 4 * v_u_12
+            local v33 = 4 * v_u_12
+            local v34 = 4 * v_u_12
+            v_u_31.Size = Vector3.new(v32, v33, v34)
+            v_u_31.CanCollide = false
+            v_u_31.Anchored = false
+            v_u_31.CFrame = v9.CFrame * CFrame.new(0, 0, -3)
+            v_u_31.CFrame = CFrame.new(v_u_31.Position, v30)
+            game.Debris:AddItem(v_u_31, 10)
+            v_u_31.Parent = workspace.Effects
+            local v_u_35 = nil
+            local v_u_36 = game.ReplicatedStorage.RS.Objects.SlashNoTrail:Clone()
+            local v37 = v_u_36.Side1
+            local v38
+            if v_u_24.SlashTrail.LightEmission >= 0.5 then
+                v38 = Color3.new(v_u_16.R * 3, v_u_16.G * 3, v_u_16.B * 3) or v_u_16
+            else
+                v38 = v_u_16
+            end
+            v37.Color3 = v38
+            v_u_36.Side2.Color3 = v_u_36.Side1.Color3
+            v_u_36.Anchored = false
+            v_u_36.CanCollide = false
+            v_u_36.Size = Vector3.new(0, 0, 0)
+            v_u_36.CFrame = v_u_31.CFrame * CFrame.Angles(-1.5707963267948966, -1.1344640137963142, 0)
+            v_u_36.Parent = v_u_31
+            local v39 = (0.5 + p_u_6 / 4) * v_u_12
+            local v40 = v_u_2.TweenService
+            local v41 = TweenInfo.new(1)
+            local v42 = {}
+            local v43 = 5 + 10 * v39
+            local v44 = 8 + 16 * v39
+            v42.Size = Vector3.new(0.3, v43, v44)
+            v40:Create(v_u_36, v41, v42):Play()
+            if v_u_18 == true then
+                v_u_35 = v_u_36:Clone()
+                local v45 = v_u_35.Side1
+                local v46
+                if v_u_24.AuraTrail.LightEmission >= 0.5 then
+                    v46 = Color3.new(v_u_17.R * 3, v_u_17.G * 3, v_u_17.B * 3) or v_u_17
+                else
+                    v46 = v_u_17
+                end
+                v45.Color3 = v46
+                v_u_35.Side2.Color3 = v_u_35.Side1.Color3
+                v_u_35.Anchored = false
+                v_u_35.CanCollide = false
+                v_u_35.Size = Vector3.new(0, 0, 0)
+                v_u_35.CFrame = v_u_31.CFrame * CFrame.Angles(-1.5707963267948966, -1.1344640137963142, 0)
+                v_u_35.Parent = v_u_31
+                local v47 = v_u_2.TweenService
+                local v48 = TweenInfo.new(1)
+                local v49 = {}
+                local v50 = 6 + 10 * v39
+                local v51 = 9 + 16 * v39
+                v49.Size = Vector3.new(0.1, v50, v51)
+                v47:Create(v_u_35, v48, v49):Play()
+                v_u_36.SlashEnergy.Color = ColorSequence.new(v_u_17)
+                v_u_36.SlashEnergy.LightEmission = v_u_24.AuraTrail.LightEmission
+                v_u_36.SlashEnergy.Brightness = v_u_24.AuraTrail.Brightness
+                v_u_36.SlashEnergy.Size = NumberSequence.new(2 + 4 * v39)
+                v_u_36.SlashEnergy.Enabled = true
+            end
+            v_u_2.SetupClashboxVars(v_u_31, p_u_3, nil, nil, p_u_6, p_u_6, 1, 1)
+            local v52 = (16 + p_u_6 * 1.91) * v_u_12 * 0.8
+            if v_u_18 == false then
+                v52 = v52 * 0.9
+            end
+            local v_u_53 = v52 * (v_u_28 / 30 * 0.3 + 1)
+            local v_u_54 = true
+            local v_u_55 = true
+            local function v_u_57(p56)
+                -- upvalues: (ref) v_u_54, (ref) v_u_55, (copy) v_u_31, (copy) v_u_36, (ref) v_u_2, (ref) v_u_53, (ref) p_u_6, (copy) p_u_3, (copy) v_u_7, (copy) v_u_16, (copy) v_u_24, (copy) v_u_18, (copy) v_u_17, (ref) v_u_35, (ref) v_u_28, (copy) p_u_4, (copy) v_u_21, (copy) v_u_22, (copy) v_u_23
+                if v_u_54 ~= false then
+                    v_u_54 = false
+                    v_u_55 = false
+                    if v_u_31:FindFirstChild("Enabled") then
+                        v_u_31.Enabled.Value = false
+                    end
+                    v_u_31.Anchored = true
+                    if v_u_36:FindFirstChild("SlashEnergy") then
+                        v_u_36.SlashEnergy.Enabled = false
+                    end
+                    v_u_2.BF.ShakeScreen(v_u_53 * 15, v_u_31.Position)
+                    if p_u_6 >= 3 then
+                        coroutine.wrap(function()
+                            -- upvalues: (ref) v_u_2, (ref) p_u_3, (ref) v_u_7, (ref) v_u_36, (ref) v_u_53
+                            v_u_2.BF.Wait(0.5)
+                            v_u_2.FM.Crater(nil, nil, p_u_3, v_u_7, v_u_2.CanDamageStructure(p_u_3), v_u_36.Position, v_u_53 * 0.25, false)
+                            v_u_2.FM.Crater(nil, nil, p_u_3, v_u_7, v_u_2.CanDamageStructure(p_u_3), (v_u_36.CFrame * CFrame.new(0, 0, v_u_36.Size.Z / 2)).Position, v_u_53 * 0.25, false)
+                            v_u_2.FM.Crater(nil, nil, p_u_3, v_u_7, v_u_2.CanDamageStructure(p_u_3), (v_u_36.CFrame * CFrame.new(0, 0, -v_u_36.Size.Z / 2)).Position, v_u_53 * 0.25, false)
+                        end)()
+                    end
+                    v_u_2.Effects.SlashHit(v_u_36.CFrame, v_u_36.Size.Z * 0.3, v_u_16, v_u_24.SlashTrail.LightEmission, 1)
+                    if v_u_18 == true then
+                        v_u_2.Effects.SlashHit(v_u_36.CFrame, v_u_36.Size.Z * 0.45, v_u_17, v_u_24.AuraTrail.LightEmission, 1)
+                    end
+                    v_u_36:Destroy()
+                    if v_u_35 then
+                        v_u_35:Destroy()
+                    end
+                    v_u_2.BF.PlaySound(v_u_2.SFX.Tools.GreatSlashHit, v_u_31, 1.1 - 0.04 * p_u_6, nil, 4)
+                    v_u_2.AOEWeaponDamage(v_u_28 * 4, p_u_3, v_u_31.Position, p56, v_u_53 * 3, p_u_4, v_u_7, "LargeStab", "HitSFX_Slash", true)
+                    v_u_2.WepImpactEffects(v_u_31.CFrame, v_u_53, p_u_6, v_u_24.SlashTrail, v_u_24.AuraTrail, v_u_18, true, v_u_21, v_u_22, v_u_23)
+                    v_u_24:Destroy()
+                end
+            end
+            v_u_31.Touched:Connect(function(p58)
+                -- upvalues: (ref) v_u_55, (ref) v_u_2, (copy) p_u_3, (ref) p_u_6, (copy) v_u_31, (ref) v_u_53, (copy) v_u_12, (copy) v_u_18, (ref) v_u_28, (ref) v_u_54, (copy) v_u_57
+                if v_u_55 == true then
+                    local v59, v60, _ = v_u_2.GetClashInteraction(nil, nil, p_u_3, p_u_6, p58, v_u_31.Position)
+                    if v59 ~= "None" then
+                        v_u_55 = false
+                        v_u_2.CA.ParticleInteraction("MetalClash", p_u_6, v_u_31.Position)
+                        if v59 == "Cancel" then
+                            v_u_31:Destroy()
+                            return
+                        end
+                        if v60 ~= nil then
+                            p_u_6 = p_u_6 - v60
+                            v_u_53 = (11 + p_u_6 * 1.5) * v_u_12
+                            if v_u_18 == false then
+                                v_u_53 = v_u_53 * 0.75
+                            end
+                            v_u_53 = v_u_53 * (v_u_28 / 60 * 0.3 + 1)
+                        end
+                        v_u_2.BF.Wait(0.15)
+                        v_u_55 = true
+                    end
+                end
+                if v_u_54 == false then
+                    return
+                elseif v_u_2.CanProjectileHit(p_u_3, p58) ~= false then
+                    v_u_57(p58)
+                end
+            end)
+            v_u_2.WepShockwaves(v9.Position, p_u_6, v_u_18, v_u_16, v_u_17, v_u_21, v_u_22, v_u_23)
+            local _ = CFrame.new(v_u_31.Position, v30) * CFrame.Angles(1.5707963267948966, 0, 0)
+            if p_u_6 >= 4 then
+                v_u_2.BF.ShakeScreen(v_u_53 * 8, v_u_31.Position)
+                v_u_2.Effects.BackDraft(1, v9.CFrame, p_u_6 * 15, nil, nil, 0.5)
+            end
+            if p_u_6 >= 6 and v_u_18 == true then
+                v_u_2.Effects.BackDraft(0.5, v9.CFrame, p_u_6 * 20, v_u_17, Enum.Material.Neon, 0.5)
+            end
+            local v61 = CFrame.new(v_u_31.Position, v30) * CFrame.Angles(1.5707963267948966, 0, 0)
+            if p_u_6 >= 2 then
+                local v62 = v_u_2.Effects.Shockwave
+                local v63 = v61 * CFrame.new(0, -5, 0)
+                local v64 = p_u_6 / 2 + 5
+                local v65 = p_u_6 / 2 + 5
+                v62(v63, nil, Vector3.new(0, 1, 0), Vector3.new(v64, 1, v65), 0.5, v_u_16, 1, Enum.Material.Neon)
+            end
+            if p_u_6 >= 6 then
+                local v66 = v_u_2.Effects.Shockwave
+                local v67 = v61 * CFrame.new(0, -10, 0)
+                local v68 = p_u_6 / 2 + 10
+                local v69 = p_u_6 / 2 + 10
+                v66(v67, nil, Vector3.new(0, 1.5, 0), Vector3.new(v68, 1.5, v69), 0.5, v_u_17, 1, Enum.Material.Neon)
+            end
+            v_u_2.BF.PlaySound(v_u_2.SFX.Boss.LargeSlash, v9, 1 - 0.03 * p_u_6)
+            v_u_2.BF.PlaySound(v_u_2.SFX.Electric.Blast, v_u_31, 1 - 0.05 * p_u_6)
+            local v70 = Instance.new("BodyVelocity")
+            v70.MaxForce = Vector3.new(inf, inf, inf)
+            v70.Velocity = CFrame.new(v_u_31.Position, v30).LookVector * v29
+            v70.Parent = v_u_31
+            v70:Clone().Parent = v_u_36
+            if v_u_35 then
+                v70:Clone().Parent = v_u_35
+            end
+            coroutine.wrap(function()
+                -- upvalues: (copy) v_u_31, (ref) v_u_54, (ref) v_u_2, (copy) v_u_36, (copy) v_u_18, (ref) v_u_35, (ref) p_u_6, (copy) v_u_17, (copy) v_u_21, (copy) v_u_22, (copy) v_u_23, (copy) v_u_16
+                while v_u_31.Parent ~= nil and (v_u_31.Anchored == false and v_u_54 == true) do
+                    v_u_2.BF.Wait(0.1)
+                    local v71 = v_u_36.Size.X
+                    local v72 = v_u_36.Size.Y * 2
+                    local v73 = v_u_36.Size.Z * 1.75
+                    local v74 = Vector3.new(v71, v72, v73)
+                    if v_u_18 == true then
+                        local v75 = v_u_35.Size.X
+                        local v76 = v_u_36.Size.Y * 2
+                        local v77 = v_u_36.Size.Z * 2.25
+                        local v78 = Vector3.new(v75, v76, v77)
+                        v_u_2.Effects.Slash(v_u_36.CFrame, v_u_36.CFrame * CFrame.new(0, p_u_6 * 5, 0), v_u_36.Size, v78, 0.25, v_u_17, 0.25, Enum.Material.Neon, nil, v_u_21, v_u_22, v_u_23)
+                        if p_u_6 > 6 then
+                            local v79 = v_u_35.Size.X
+                            local v80 = v_u_36.Size.Y * 6
+                            local v81 = v_u_36.Size.Z * 4
+                            local v82 = Vector3.new(v79, v80, v81)
+                            v_u_2.Effects.Slash(v_u_36.CFrame, v_u_36.CFrame * CFrame.new(0, p_u_6 * 4, 0), v_u_36.Size, v82, 0.75, v_u_17, 0.25, Enum.Material.Neon, nil, v_u_21, v_u_22, v_u_23)
+                        end
+                    end
+                    v_u_2.Effects.Slash(v_u_36.CFrame, v_u_36.CFrame * CFrame.new(0, p_u_6 * 5, 0), v_u_36.Size, v74, 0, v_u_16, 0.25, Enum.Material.Neon)
+                end
+            end)()
+            coroutine.wrap(function()
+                -- upvalues: (ref) v_u_2, (copy) v_u_20, (copy) v_u_57
+                v_u_2.BF.Wait(v_u_20 == true and 5 or 2.5)
+                v_u_57()
+            end)()
+            v_u_2.BF.Wait(0.2 * v11)
+            v_u_2.WepShockwaves(v9.Position, p_u_6, v_u_18, v_u_16, v_u_17, v_u_21, v_u_22, v_u_23)
+            v_u_2.ToggleSlashTrail(v14, false, v_u_18, false)
+            v_u_2.AdjustSpeed(v26, 0)
+            v_u_2.AimFix(v9, v25)
+            local v83 = v_u_2.BF.LerpNumber(0.394, 0.394 * v11, 0.25)
+            v_u_2.BF.Wait(v83)
+            v_u_2.EndAim(p_u_3, v8)
+            v_u_2.StopAnimation(v26, 0.25)
+            v_u_2.WeaponEnd(p_u_3, p_u_4, p5)
+            v_u_2.DestroyObject(v25)
+        end
+    end
+    return v1
+    end
+
+    return FlyingSlash
+]]
+
+-- Place the new ModuleScript in the same hierarchy
+newFlyingSlash.Parent = weapons
+print("New Flying Slash script has been created and placed in the hierarchy.")
